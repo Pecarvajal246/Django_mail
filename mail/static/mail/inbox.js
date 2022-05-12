@@ -67,15 +67,13 @@ function send_email() {
 function show_mails(result) {
   for (let i= 0; i < result.length; i++) {
     let id = result[i].id
-    let recipients = result[i].recipients
+    let senders = result[i].sender
     let subject = result[i].subject
-    let body = result[i].body
     let timestamp = result[i].timestamp
     let read = result[i].read
-    let archived = result[i].archived
 
-    const element = document.createElement('div');
-    element.innerHTML = `${recipients} ${subject} ${timestamp}`;
+    let element = document.createElement('div');
+    element.innerHTML = `${senders} ${subject} ${timestamp}`;
     element.style.border = "1px solid black"
     element.style.borderRadius = "5px"
     element.style.padding = "5px"
@@ -86,52 +84,76 @@ function show_mails(result) {
     else {
       element.style.backgroundColor = "lightGray"
     }
-    element.addEventListener('click', show_mail)
+    element.addEventListener('click', get_mail)
     document.querySelector('#emails-view').append(element);
   }
 }
 
-function show_mail(e) {
+function get_mail(e) {
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'block';
+
   id = e.target.id
   fetch(`/emails/${id}`)
   .then(response => response.json())
-  .then(result => {
-    let id = result.id
-    let sender = result.sender
-    let recipient = result.recipients
-    let subject = result.subject
-    let body = result.body
-    let timestamp = result.timestamp
-
-    document.querySelector('#emails-view').style.display = 'none';
-    document.querySelector('#email-view').style.display = 'block';
-    document.querySelector('#compose-view').style.display = 'none';
-
-    const subject_html = document.createElement('div');
-    subject_html.innerHTML = subject;
-    document.querySelector('#email-view').append(subject_html);
-
-    const sender_html = document.createElement('div');
-    sender_html.innerHTML = `from: ${sender}`
-    document.querySelector('#email-view').append(sender_html);
-
-    const recipient_html = document.createElement('div');
-    recipient_html.innerHTML = `to: ${recipient}`
-    document.querySelector('#email-view').append(recipient_html);
-
-    const timestamp_html = document.createElement('div');
-    timestamp_html.innerHTML = `at: ${timestamp}`
-    document.querySelector('#email-view').append(timestamp_html);
-
-    const body_html = document.createElement('p');
-    body_html.innerHTML = `${body}`
-    document.querySelector('#email-view').append(body_html);
-  })
+  .then(result => show_mail(result))
 
   fetch(`/emails/${id}`,{
-    method: 'PUT',
-    body: JSON.stringify({
+  method: 'PUT',
+  body: JSON.stringify({
     read: true
-      })
+    })
   })
 }
+
+function show_mail(result) {
+  const id = result.id
+  const sender = result.sender
+  const recipient = result.recipients
+  const subject = result.subject
+  const body = result.body
+  const timestamp = result.timestamp
+  const archived = result.archived
+
+  document.querySelector('#email-view').innerHTML = `<h3>${subject}</h3>`;
+
+  const sender_html = document.createElement('div');
+  sender_html.innerHTML = `from: ${sender}`
+  document.querySelector('#email-view').append(sender_html);
+
+  const recipient_html = document.createElement('div');
+  recipient_html.innerHTML = `to: ${recipient}`
+  document.querySelector('#email-view').append(recipient_html);
+
+  const timestamp_html = document.createElement('div');
+  timestamp_html.innerHTML = `at: ${timestamp}`
+  document.querySelector('#email-view').append(timestamp_html);
+
+  const body_html = document.createElement('p');
+  body_html.innerHTML = `${body}`
+  document.querySelector('#email-view').append(body_html);
+
+  const archive_button = document.createElement('button')
+
+  if (archived) {
+    archive_button.innerHTML = 'unarchive'
+  }
+  else {
+    archive_button.innerHTML = 'archive'
+  }
+
+  archive_button.addEventListener('click', () => {
+    fetch(`/emails/${id}`,{
+      method: 'PUT',
+      body: JSON.stringify({
+      archived: !archived
+      })
+    })
+    load_mailbox('inbox')
+  })
+
+  document.querySelector('#email-view').append(archive_button);
+}
+
+
