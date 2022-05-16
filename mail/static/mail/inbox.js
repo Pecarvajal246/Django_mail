@@ -143,6 +143,11 @@ function show_mail(result) {
     archive_button.innerHTML = 'archive'
   }
 
+  archive_button.style.backgroundColor = 'lightGray'
+  archive_button.style.border = "1px solid black"
+  archive_button.style.borderRadius = "5px"
+  archive_button.style.padding = "5px"
+
   archive_button.addEventListener('click', () => {
     fetch(`/emails/${id}`,{
       method: 'PUT',
@@ -154,6 +159,23 @@ function show_mail(result) {
   })
 
   document.querySelector('#email-view').append(archive_button);
+
+  const reply_button = document.createElement('button')
+  reply_button.style.backgroundColor = 'White'
+  reply_button.style.border = "1px solid black"
+  reply_button.style.borderRadius = "5px"
+  reply_button.style.padding = "5px"
+  reply_button.innerHTML = "reply"
+
+  reply_button.addEventListener('click', () => {
+    compose_email()
+    document.querySelector('#compose-recipients').value = sender;
+    document.querySelector('#compose-subject').value = `Re: ${subject}`;
+    document.querySelector('#compose-body').value = `On ${timestamp} {sender} wrote:
+${body}`;
+  })
+
+  document.querySelector('#email-view').append(reply_button);
 }
 
 
