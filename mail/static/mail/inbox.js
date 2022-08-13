@@ -171,7 +171,7 @@ function show_mail(result) {
     compose_email()
     document.querySelector('#compose-recipients').value = sender;
     document.querySelector('#compose-subject').value = `Re: ${subject}`;
-    document.querySelector('#compose-body').value = `On ${timestamp} {sender} wrote:
+    document.querySelector('#compose-body').value = `On ${timestamp} ${sender} wrote:
 ${body}`;
   })
 
